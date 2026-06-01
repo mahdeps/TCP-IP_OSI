@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSI vs TCP/IP — مقارنة النماذج</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #05090f;
+      --bg2:       #0a1120;
+      --bg3:       #0f1a2e;
+      --border:    rgba(255,255,255,0.055);
+      --text:      #d8e4f5;
+      --muted:     #5a728a;
+
+      --c-app:       #b57cf0;
+      --c-transport: #3dd68c;
+      --c-internet:  #f5a623;
+      --c-access:    #f06b7a;
+
+      --layer-h: 72px;
+      --gap:      8px;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── dot-grid bg ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.032) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── ambient glow ── */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 900px;
+      height: 400px;
+      background: radial-gradient(ellipse at center, rgba(100,60,200,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 52px 22px 72px;
+    }
+
+    /* ══════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════ */
+    .header { text-align: center; margin-bottom: 58px; }
+
+    .header-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(181,124,240,0.09);
+      border: 1px solid rgba(181,124,240,0.2);
+      color: var(--c-app);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    .header h1 {
+      font-size: clamp(2.4rem, 6vw, 4.2rem);
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      line-height: 1;
+      margin-bottom: 14px;
+    }
+
+    .t-osi { color: #c47cf9; }
+    .t-sep { color: rgba(255,255,255,0.13); font-size: 0.55em; letter-spacing: 5px; vertical-align: middle; }
+    .t-tcp { color: #38c4f5; }
+
+    .header-sub { color: var(--muted); font-size: 0.92rem; }
+
+    /* ══════════════════════════════════════
+       LEGEND
+    ══════════════════════════════════════ */
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* ══════════════════════════════════════
+       COMPARISON WRAPPER
+    ══════════════════════════════════════ */
+    .cmp-wrapper {
+      position: relative;
+      direction: ltr; /* keep layout LTR regardless of RTL body */
+      display: grid;
+      grid-template-columns: 1fr 72px 1fr;
+      align-items: start;
+      margin-bottom: 56px;
+    }
+
+    /* SVG overlay — drawn by JS */
+    #conn-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    /* ══════════════════════════════════════
+       PANELS
+    ══════════════════════════════════════ */
+    .panel {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      text-align: center;
+      padding: 22px 20px 20px;
+      border-bottom: 1px solid var(--border);
+      direction: rtl;
+    }
+
+    .panel-icon { font-size: 1.6rem; line-height: 1; margin-bottom: 6px; }
+
+    .panel-name {
+      font-size: 1.05rem;
+      font-weight: 900;
+      direction: ltr;
+      letter-spacing: 0.5px;
+    }
+
+    .panel-sub {
+      font-size: 0.73rem;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    .panel-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 11px;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    .badge-osi { background: rgba(196,124,249,0.12); color: #c47cf9; border: 1px solid rgba(196,124,249,0.22); }
+    .badge-tcp { background: rgba(56,196,245,0.12); color: #38c4f5; border: 1px solid rgba(56,196,245,0.22); }
+
+    /* ── LAYERS CONTAINER ── */
+    .layers {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      direction: rtl;
+    }
+
+    .layer {
+      height: var(--layer-h);
+      border-radius: 10px;
+      padding: 0 14px;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      transition: filter 0.22s ease, transform 0.18s ease;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* tinted background fill */
+    .layer::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: currentColor;
+      opacity: 0.1;
+      transition: opacity 0.2s;
+    }
+
+    /* left accent bar */
+    .layer::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 12px;
+      bottom: 12px;
+      width: 3px;
+      background: currentColor;
+      border-radius: 2px;
+      opacity: 0.7;
+    }
+
+    .layer:hover::before { opacity: 0.18; }
+    .layer:hover { transform: scale(1.013); }
+
+    .layer-body { position: relative; width: 100%; }
+
+    .l-num  { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; opacity: 0.45; letter-spacing: 2px; direction: ltr; }
+    .l-name { font-size: 0.88rem; font-weight: 800; margin: 2px 0; direction: ltr; }
+    .l-info { font-size: 0.68rem; opacity: 0.65; line-height: 1.45; }
+
+    /* ── group colors ── */
+    .g-app       { color: var(--c-app);       }
+    .g-transport { color: var(--c-transport); }
+    .g-internet  { color: var(--c-internet);  }
+    .g-access    { color: var(--c-access);    }
+
+    /* TCP/IP tall layers */
+    .tall-3 { height: calc(3 * var(--layer-h) + 2 * var(--gap)); }
+    .tall-2 { height: calc(2 * var(--layer-h) + 1 * var(--gap)); }
+
+    /* middle spacer col */
+    .conn-col { /* SVG overlay handles drawing */ }
+
+    /* ══════════════════════════════════════
+       DIFFERENCES SECTION
+    ══════════════════════════════════════ */
+    .section-label {
+      text-align: center;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .section-label::before,
+    .section-label::after {
+      content: '';
+      height: 1px;
+      width: 60px;
+      background: var(--border);
+    }
+
+    .diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .diff-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 26px;
+      transition: transform 0.2s ease, border-color 0.2s;
+    }
+
+    .diff-card:hover { transform: translateY(-3px); }
+    .diff-card.dc-osi { border-top: 2px solid #c47cf9; }
+    .diff-card.dc-tcp { border-top: 2px solid #38c4f5; }
+
+    .diff-card h3 {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .diff-card ul { list-style: none; }
+
+    .diff-card li {
+      font-size: 0.79rem;
+      color: var(--muted);
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .diff-card li:last-child { border-bottom: none; }
+
+    .li-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ══════════════════════════════════════
+       SUMMARY BAR
+    ══════════════════════════════════════ */
+    .summary {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 34px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* decorative glow inside summary */
+    .summary::before {
+      content: '';
+      position: absolute;
+      top: -60%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70%;
+      height: 200%;
+      background: radial-gradient(ellipse, rgba(181,124,240,0.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .summary h4 {
+      position: relative;
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .pills {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 11px 26px;
+      border-radius: 50px;
+      line-height: 1.4;
+    }
+
+    .pill-osi { background: rgba(196,124,249,0.1); border: 1px solid rgba(196,124,249,0.28); color: #c47cf9; }
+    .pill-tcp { background: rgba(56,196,245,0.1);  border: 1px solid rgba(56,196,245,0.28);  color: #38c4f5; }
+
+    /* ══════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════ */
+    @media (max-width: 680px) {
+      .cmp-wrapper {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        direction: rtl;
+      }
+      .conn-col { display: none; }
+      #conn-svg { display: none; }
+      .diff-grid { grid-template-columns: 1fr; }
+      .legend { gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── HEADER ── -->
+  <div class="header">
+    <div class="header-tag">🌐 Network Models</div>
+    <h1>
+      <span class="t-osi">OSI</span>
+      <span class="t-sep">&nbsp;vs&nbsp;</span>
+      <span class="t-tcp">TCP/IP</span>
+    </h1>
+    <p class="header-sub">مقارنة شاملة بين النموذجين الأساسيين في عالم الشبكات</p>
+  </div>
+
+  <!-- ── LEGEND ── -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:var(--c-app)"></div>
+      <span>Application</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:var(--c-transport)"></div>
+      <span>Transport</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:var(--c-internet)"></div>
+      <span>Internet / Network</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:var(--c-access)"></div>
+      <span>Network Access / Physical</span>
+    </div>
+  </div>
+
+  <!-- ── COMPARISON ── -->
+  <div class="cmp-wrapper" id="cmpWrapper">
+
+    <!-- OSI Panel -->
+    <div class="panel" id="osiPanel">
+      <div class="panel-head">
+        <div class="panel-icon">🧠</div>
+        <div class="panel-name" style="color:#c47cf9">OSI Model</div>
+        <div class="panel-sub">نموذج نظري / تعليمي</div>
+        <span class="panel-badge badge-osi">7 layers</span>
+      </div>
+      <div class="layers" id="osiLayers">
+        <div class="layer g-app"       data-g="app"       style="animation-delay:.04s">
+          <div class="layer-body">
+            <div class="l-num">LAYER 7</div>
+            <div class="l-name">Application</div>
+            <div class="l-info">HTTP · FTP · SMTP · DNS</div>
+          </div>
+        </div>
+        <div class="layer g-app"       data-g="app"       style="animation-delay:.10s">
+          <div class="layer-body">
+            <div class="l-num">LAYER 6</div>
+            <div class="l-name">Presentation</div>
+            <div class="l-info">تشفير + ضغط البيانات</div>
+          </div>
+        </div>
+        <div class="layer g-app"       data-g="app"       style="animation-delay:.16s">
+          <div class="layer-body">
+            <div class="l-num">LAYER 5</div>
+            <div class="l-name">Session</div>
+            <div class="l-info">إدارة الجلسات</div>
+          </div>
+        </div>
+        <div class="layer g-transport" data-g="transport" style="animation-delay:.22s">
+          <div class="layer-body">
+            <div class="l-num">LAYER 4</div>
+            <div class="l-name">Transport</div>
+            <div class="l-info">TCP · UDP</div>
+          </div>
+        </div>
+        <div class="layer g-internet"  data-g="internet"  style="animation-delay:.28s">
+          <div class="layer-body">
+            <div class="l-num">LAYER 3</div>
+            <div class="l-name">Network</div>
+            <div class="l-info">IP Routing</div>
+          </div>
+        </div>
+        <div class="layer g-access"    data-g="access"    style="animation-delay:.34s">
+          <div class="layer-body">
+            <div class="l-num">LAYER 2</div>
+            <div class="l-name">Data Link</div>
+            <div class="l-info">MAC Address · تصحيح الأخطاء</div>
+          </div>
+        </div>
+        <div class="layer g-access"    data-g="access"    style="animation-delay:.40s">
+          <div class="layer-body">
+            <div class="l-num">LAYER 1</div>
+            <div class="l-name">Physical</div>
+            <div class="l-info">نقل الإشارات الكهربائية</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connector spacer column -->
+    <div class="conn-col"></div>
+
+    <!-- TCP/IP Panel -->
+    <div class="panel" id="tcpPanel">
+      <div class="panel-head">
+        <div class="panel-icon">⚡</div>
+        <div class="panel-name" style="color:#38c4f5">TCP/IP Model</div>
+        <div class="panel-sub">نموذج عملي / الإنترنت</div>
+        <span class="panel-badge badge-tcp">4 layers</span>
+      </div>
+      <div class="layers" id="tcpLayers">
+        <div class="layer tall-3 g-app"       data-g="app"       style="animation-delay:.07s">
+          <div class="layer-body">
+            <div class="l-num">LAYER 4</div>
+            <div class="l-name">Application</div>
+            <div class="l-info">HTTP · FTP · DNS · SMTP<br>يشمل طبقات 5، 6، 7 من OSI</div>
+          </div>
+        </div>
+        <div class="layer g-transport"        data-g="transport" style="animation-delay:.19s">
+          <div class="layer-body">
+            <div class="l-num">LAYER 3</div>
+            <div class="l-name">Transport</div>
+            <div class="l-info">TCP · UDP</div>
+          </div>
+        </div>
+        <div class="layer g-internet"         data-g="internet"  style="animation-delay:.28s">
+          <div class="layer-body">
+            <div class="l-num">LAYER 2</div>
+            <div class="l-name">Internet</div>
+            <div class="l-info">IP Routing</div>
+          </div>
+        </div>
+        <div class="layer tall-2 g-access"    data-g="access"    style="animation-delay:.37s">
+          <div class="layer-body">
+            <div class="l-num">LAYER 1</div>
+            <div class="l-name">Network Access</div>
+            <div class="l-info">Physical + Data Link<br>إشارات + MAC Address</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SVG connector overlay -->
+    <svg id="conn-svg" style="position:absolute;top:0;left:0;pointer-events:none;overflow:visible;"></svg>
+  </div>
+
+  <!-- ── DIFFERENCES ── -->
+  <div class="section-label">⚖️ الفروقات الرئيسية</div>
+  <div class="diff-grid">
+    <div class="diff-card dc-osi">
+      <h3 style="color:#c47cf9">🧠 OSI Model</h3>
+      <ul>
+        <li><span class="li-dot" style="background:var(--c-app)"></span>نموذج نظري وتعليمي</li>
+        <li><span class="li-dot" style="background:var(--c-app)"></span>7 طبقات مفصلة</li>
+        <li><span class="li-dot" style="background:var(--c-app)"></span>أكثر تفصيلاً ودقة</li>
+        <li><span class="li-dot" style="background:var(--c-app)"></span>يُستخدم لفهم الشبكات</li>
+        <li><span class="li-dot" style="background:var(--c-app)"></span>لا يُطبق مباشرة في الإنترنت</li>
+      </ul>
+    </div>
+    <div class="diff-card dc-tcp">
+      <h3 style="color:#38c4f5">⚡ TCP/IP Model</h3>
+      <ul>
+        <li><span class="li-dot" style="background:#38c4f5"></span>نموذج عملي وفعلي</li>
+        <li><span class="li-dot" style="background:#38c4f5"></span>4 طبقات أبسط وأوضح</li>
+        <li><span class="li-dot" style="background:#38c4f5"></span>أسرع وأسهل في التطبيق</li>
+        <li><span class="li-dot" style="background:#38c4f5"></span>أساس الإنترنت الحديث</li>
+        <li><span class="li-dot" style="background:#38c4f5"></span>يُستخدم في كل الشبكات فعلياً</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── SUMMARY ── -->
+  <div class="summary">
+    <h4>💡 الخلاصة للحفظ</h4>
+    <div class="pills">
+      <span class="pill pill-osi">OSI &nbsp;=&nbsp; فهم الشبكات &nbsp;(7 طبقات)</span>
+      <span class="pill pill-tcp">TCP/IP &nbsp;=&nbsp; تطبيق الإنترنت &nbsp;(4 طبقات)</span>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+  /* ═══════════════════════════════════
+     Draw SVG connector lines
+  ═══════════════════════════════════ */
+  const GROUPS = [
+    { osiIdxs: [0, 1, 2], tcpIdx: 0, color: '#b57cf0' }, // app
+    { osiIdxs: [3],       tcpIdx: 1, color: '#3dd68c' }, // transport
+    { osiIdxs: [4],       tcpIdx: 2, color: '#f5a623' }, // internet
+    { osiIdxs: [5, 6],    tcpIdx: 3, color: '#f06b7a' }, // access
+  ];
+
+  function mkSVGEl(tag, attrs) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+    return el;
+  }
+
+  function drawLines() {
+    const svg     = document.getElementById('conn-svg');
+    const wrapper = document.getElementById('cmpWrapper');
+    const osiEls  = [...document.querySelectorAll('#osiLayers .layer')];
+    const tcpEls  = [...document.querySelectorAll('#tcpLayers .layer')];
+    const wR      = wrapper.getBoundingClientRect();
+
+    svg.setAttribute('width',  wR.width);
+    svg.setAttribute('height', wR.height);
+    svg.innerHTML = '';
+
+    GROUPS.forEach(({ osiIdxs, tcpIdx, color }) => {
+      const tcpEl   = tcpEls[tcpIdx];
+      const tcpRect = tcpEl.getBoundingClientRect();
+      const tcpCY   = tcpRect.top  - wR.top + tcpRect.height / 2;
+      const tcpX    = tcpRect.left - wR.left; // left edge of TCP panel
+
+      osiIdxs.forEach(idx => {
+        const osiEl   = osiEls[idx];
+        const osiRect = osiEl.getBoundingClientRect();
+        const osiCY   = osiRect.top   - wR.top + osiRect.height / 2;
+        const osiX    = osiRect.right - wR.left; // right edge of OSI panel
+
+        svg.appendChild(mkSVGEl('line', {
+          x1: osiX, y1: osiCY, x2: tcpX, y2: tcpCY,
+          stroke: color, 'stroke-width': '1.5',
+          'stroke-dasharray': '5 4', opacity: '0.42'
+        }));
+
+        // dot on OSI side
+        svg.appendChild(mkSVGEl('circle', {
+          cx: osiX, cy: osiCY, r: '3.5',
+          fill: color, opacity: '0.65'
+        }));
+      });
+
+      // dot on TCP side
+      svg.appendChild(mkSVGEl('circle', {
+        cx: tcpX, cy: tcpCY, r: '3.5',
+        fill: color, opacity: '0.65'
+      }));
+    });
+  }
+
+  document.fonts.ready.then(() => requestAnimationFrame(drawLines));
+  window.addEventListener('resize', drawLines);
+  // Also draw after all animations settle
+  setTimeout(drawLines, 600);
+
+  /* ═══════════════════════════════════
+     Hover: highlight matching group
+  ═══════════════════════════════════ */
+  const allLayers = document.querySelectorAll('.layer');
+
+  allLayers.forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      const g = el.dataset.g;
+      allLayers.forEach(l => {
+        l.style.filter = l.dataset.g === g
+          ? 'brightness(1.35) saturate(1.2)'
+          : 'brightness(0.38) saturate(0.3)';
+      });
+    });
+    el.addEventListener('mouseleave', () => {
+      allLayers.forEach(l => {
+        l.style.filter = '';
+        l.style.transition = 'filter 0.3s ease, transform 0.18s ease';
+      });
+    });
+  });
+</script>
+</body>
+</html>
