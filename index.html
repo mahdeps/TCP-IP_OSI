@@ -1,673 +1,673 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OSI vs TCP/IP — مقارنة النماذج</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:        #05090f;
-      --bg2:       #0a1120;
-      --bg3:       #0f1a2e;
-      --border:    rgba(255,255,255,0.055);
-      --text:      #d8e4f5;
-      --muted:     #5a728a;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSI & TCP/IP — الدليل الشامل</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050c18;--bg2:#09141f;--bg3:#0d1b2a;--surface:#122038;
+  --bd:rgba(255,255,255,0.065);--text:#cde4f8;--muted:#3d5a78;--faint:rgba(255,255,255,0.035);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(rgba(255,255,255,0.02) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;z-index:0}
+.page{position:relative;z-index:1;max-width:940px;margin:0 auto;padding:50px 18px 90px}
 
-      --c-app:       #b57cf0;
-      --c-transport: #3dd68c;
-      --c-internet:  #f5a623;
-      --c-access:    #f06b7a;
+/* HEADER */
+.hdr{text-align:center;margin-bottom:48px}
+.hdr-tag{display:inline-block;font-size:.62rem;letter-spacing:2.5px;font-weight:700;color:#b57cf0;border:1px solid rgba(181,124,240,.22);background:rgba(181,124,240,.07);padding:5px 15px;border-radius:20px;margin-bottom:20px;text-transform:uppercase}
+.hdr h1{font-size:clamp(1.9rem,5.5vw,3.4rem);font-weight:900;line-height:1.1;letter-spacing:-1px;margin-bottom:12px}
+.hdr-sub{color:var(--muted);font-size:.88rem;line-height:1.75;max-width:460px;margin:0 auto}
 
-      --layer-h: 72px;
-      --gap:      8px;
-    }
+/* TABS */
+.tabs{display:flex;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:5px;gap:4px;margin-bottom:32px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tb{flex:1;min-width:105px;border:none;background:transparent;font-family:'Cairo',sans-serif;font-weight:700;font-size:.78rem;color:var(--muted);padding:10px 10px;border-radius:10px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.tb:hover{color:var(--text);background:var(--faint)}
+.tb.on{background:var(--surface);color:var(--text);box-shadow:0 2px 12px rgba(0,0,0,.35)}
 
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+/* PANELS */
+.pnl{display:none;animation:fadeUp .32s ease}
+.pnl.on{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
-    body {
-      font-family: 'Cairo', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
+/* INTRO BOX */
+.intro{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:22px 22px;margin-bottom:22px;display:flex;gap:16px;align-items:flex-start}
+.intro-ico{font-size:1.9rem;flex-shrink:0;margin-top:2px}
+.intro h3{font-size:.96rem;font-weight:800;margin-bottom:7px}
+.intro p{font-size:.79rem;color:#5e80a0;line-height:1.78}
+.intro strong{color:#a8c8e8}
 
-    /* ── dot-grid bg ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: radial-gradient(rgba(255,255,255,0.032) 1px, transparent 1px);
-      background-size: 28px 28px;
-      pointer-events: none;
-      z-index: 0;
-    }
+/* MNEMONIC */
+.mnemo{background:rgba(181,124,240,.06);border:1px solid rgba(181,124,240,.16);border-radius:12px;padding:15px 18px;margin-bottom:22px;display:flex;gap:12px;align-items:flex-start}
+.mnemo-ico{font-size:1.3rem;flex-shrink:0}
+.mnemo p{font-size:.77rem;color:#9070c8;line-height:1.7}
+.mnemo strong{color:#c090f0}
 
-    /* ── ambient glow ── */
-    body::after {
-      content: '';
-      position: fixed;
-      top: -15%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 900px;
-      height: 400px;
-      background: radial-gradient(ellipse at center, rgba(100,60,200,0.07) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
+/* LAYER CARDS */
+.lcards{display:flex;flex-direction:column;gap:8px;margin-bottom:28px}
+.lc{background:var(--bg2);border:1px solid var(--bd);border-radius:13px;overflow:hidden;animation:fadeUp .4s ease both}
+.lc-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none;transition:background .15s;direction:rtl}
+.lc-head:hover{background:rgba(255,255,255,.022)}
+.lnum{width:44px;height:44px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.lnum-n{font-size:.98rem;font-weight:700;line-height:1}
+.lnum-l{font-size:.4rem;letter-spacing:1px;opacity:.5}
+.ltitles{flex:1}
+.lname-ar{font-size:.92rem;font-weight:800;margin-bottom:2px}
+.lname-en{font-size:.68rem;direction:ltr;text-align:right;opacity:.5;font-weight:600}
+.lpdu{font-family:'JetBrains Mono',monospace;font-size:.56rem;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.04);color:var(--muted);flex-shrink:0;direction:ltr}
+.lkw{font-size:.62rem;padding:3px 9px;border-radius:6px;flex-shrink:0}
+.larr{color:var(--muted);font-size:.68rem;transition:transform .25s;flex-shrink:0}
+.lc.op .larr{transform:rotate(180deg)}
 
-    .page {
-      position: relative;
-      z-index: 1;
-      max-width: 1040px;
-      margin: 0 auto;
-      padding: 52px 22px 72px;
-    }
+/* BODY */
+.lb{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1)}
+.lc.op .lb{max-height:1000px}
+.lcont{border-top:1px solid var(--bd);padding:20px 16px}
 
-    /* ══════════════════════════════════════
-       HEADER
-    ══════════════════════════════════════ */
-    .header { text-align: center; margin-bottom: 58px; }
+/* INFO GRID */
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:560px){.ig{grid-template-columns:1fr}}
+.is h5{font-size:.62rem;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:8px}
+.is p{font-size:.79rem;color:#5e80a0;line-height:1.75}
+.en-p{font-size:.73rem;color:#3d5878;direction:ltr;text-align:left;line-height:1.65;font-style:italic;margin-top:5px}
 
-    .header-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(181,124,240,0.09);
-      border: 1px solid rgba(181,124,240,0.2);
-      color: var(--c-app);
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 2.5px;
-      padding: 5px 14px;
-      border-radius: 20px;
-      text-transform: uppercase;
-      margin-bottom: 22px;
-    }
+/* PROTOCOLS */
+.protos{display:flex;flex-wrap:wrap;gap:5px}
+.proto{font-family:'JetBrains Mono',monospace;font-size:.59rem;font-weight:700;padding:4px 9px;border-radius:6px;direction:ltr;cursor:default;transition:transform .15s}
+.proto:hover{transform:scale(1.1)}
 
-    .header h1 {
-      font-size: clamp(2.4rem, 6vw, 4.2rem);
-      font-weight: 900;
-      letter-spacing: -1.5px;
-      line-height: 1;
-      margin-bottom: 14px;
-    }
+/* DEVICES */
+.devs{display:flex;flex-wrap:wrap;gap:6px}
+.dev{font-size:.72rem;padding:4px 12px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
 
-    .t-osi { color: #c47cf9; }
-    .t-sep { color: rgba(255,255,255,0.13); font-size: 0.55em; letter-spacing: 5px; vertical-align: middle; }
-    .t-tcp { color: #38c4f5; }
+/* ANALOGY */
+.analo{background:rgba(255,255,255,.025);border-radius:10px;padding:13px 15px;display:flex;gap:11px;margin-bottom:11px}
+.analo-em{font-size:1.5rem;flex-shrink:0}
+.analo-tx{font-size:.79rem;color:#5e80a0;line-height:1.7}
+.analo-tx strong{color:var(--text)}
 
-    .header-sub { color: var(--muted); font-size: 0.92rem; }
+/* TIP */
+.tip{border-right:3px solid;border-radius:0 8px 8px 0;padding:10px 13px;font-size:.76rem;color:#4a6888;line-height:1.65;background:rgba(255,255,255,.02)}
 
-    /* ══════════════════════════════════════
-       LEGEND
-    ══════════════════════════════════════ */
-    .legend {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-bottom: 40px;
-    }
+/* OSI MAPPING BADGE */
+.omap{display:inline-block;font-size:.7rem;padding:4px 12px;border-radius:8px;margin-bottom:12px}
 
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 0.72rem;
-      color: var(--muted);
-    }
+/* DEMO */
+.demo{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:24px 20px;margin-bottom:28px}
+.demo h3{font-size:.95rem;font-weight:800;margin-bottom:6px}
+.demo p{font-size:.78rem;color:var(--muted);margin-bottom:18px;line-height:1.7}
+.demo-btns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.btn-p{background:rgba(181,124,240,.14);border:1px solid rgba(181,124,240,.28);color:#c490f0;font-family:'Cairo',sans-serif;font-size:.8rem;font-weight:700;padding:10px 20px;border-radius:9px;cursor:pointer;transition:all .2s}
+.btn-p:hover{background:rgba(181,124,240,.24);transform:translateY(-1px)}
+.btn-s{background:transparent;border:1px solid var(--bd);color:var(--muted);font-family:'Cairo',sans-serif;font-size:.8rem;font-weight:700;padding:10px 20px;border-radius:9px;cursor:pointer;transition:all .2s}
+.btn-s:hover{color:var(--text);border-color:rgba(255,255,255,.14)}
 
-    .legend-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
+/* ENCAP VIZ */
+.eviz{display:none}
+.eviz.show{display:block}
+.etitle{font-size:.66rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:14px;text-align:center}
+.erow{display:flex;align-items:center;gap:10px;margin-bottom:7px;opacity:0;transform:translateX(-18px);transition:opacity .35s ease,transform .35s ease;direction:ltr}
+.erow.in{opacity:1;transform:translateX(0)}
+.eln{font-size:.58rem;font-weight:700;width:72px;text-align:right;flex-shrink:0;direction:rtl;line-height:1.35}
+.ebar{flex:1;display:flex;height:32px;border-radius:7px;overflow:hidden;font-family:'JetBrains Mono',monospace;font-size:.52rem;font-weight:700}
+.ehdr{display:flex;align-items:center;justify-content:center;padding:0 7px;white-space:nowrap;flex-shrink:0}
+.epay{flex:1;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.04);color:#2e4a60;font-size:.5rem;white-space:nowrap;overflow:hidden;padding:0 6px}
+.eftr{display:flex;align-items:center;justify-content:center;padding:0 7px;white-space:nowrap;flex-shrink:0}
+.epdu{font-family:'JetBrains Mono',monospace;font-size:.55rem;width:58px;color:var(--muted);flex-shrink:0}
 
-    /* ══════════════════════════════════════
-       COMPARISON WRAPPER
-    ══════════════════════════════════════ */
-    .cmp-wrapper {
-      position: relative;
-      direction: ltr; /* keep layout LTR regardless of RTL body */
-      display: grid;
-      grid-template-columns: 1fr 72px 1fr;
-      align-items: start;
-      margin-bottom: 56px;
-    }
+/* COMPARISON */
+.cmp-intro{background:var(--bg2);border:1px solid var(--bd);border-radius:13px;padding:18px 20px;margin-bottom:22px}
+.cmp-intro h4{font-size:.88rem;font-weight:800;margin-bottom:8px}
+.cmp-intro p{font-size:.78rem;color:#5e80a0;line-height:1.72}
+.cmp-visual{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+@media(max-width:560px){.cmp-visual{grid-template-columns:1fr}}
+.cmp-col{background:var(--bg2);border:1px solid var(--bd);border-radius:13px;overflow:hidden}
+.cmp-head{padding:16px;border-bottom:1px solid var(--bd);text-align:center}
+.cmp-head h3{font-size:.92rem;font-weight:900}
+.cmp-head span{font-size:.7rem;color:var(--muted)}
+.cmp-layers{padding:10px;display:flex;flex-direction:column;gap:7px}
+.cl{border-radius:9px;padding:0 13px;display:flex;align-items:center;position:relative;cursor:default}
+.cl::before{content:'';position:absolute;inset:0;background:currentColor;opacity:.1;border-radius:9px}
+.cl-txt{position:relative}
+.cl-ar{font-size:.75rem;font-weight:700}
+.cl-en{font-size:.56rem;direction:ltr;text-align:right;opacity:.45;font-family:'JetBrains Mono',monospace}
 
-    /* SVG overlay — drawn by JS */
-    #conn-svg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-      overflow: visible;
-    }
+/* DIFF TABLE */
+.dtbl{background:var(--bg2);border:1px solid var(--bd);border-radius:13px;overflow:hidden;margin-bottom:24px}
+.dr{display:grid;grid-template-columns:1.1fr 1fr 1fr;border-bottom:1px solid var(--bd)}
+.dr:last-child{border-bottom:none}
+.dr.dh{background:rgba(255,255,255,.025)}
+.dc{padding:12px 15px;font-size:.77rem;border-left:1px solid var(--bd);direction:rtl;line-height:1.6}
+.dc:last-child{border-left:none}
+.dr.dh .dc{font-weight:700;font-size:.7rem;color:var(--muted)}
+@media(max-width:560px){.dr{grid-template-columns:1fr}.dc{border-left:none;border-bottom:1px solid var(--bd)}.dc:last-child{border-bottom:none}}
 
-    /* ══════════════════════════════════════
-       PANELS
-    ══════════════════════════════════════ */
-    .panel {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-    }
+/* MAPPING TABLE */
+.maptbl{background:var(--bg2);border:1px solid var(--bd);border-radius:13px;overflow:hidden;margin-bottom:28px}
+.mrow{display:flex;border-bottom:1px solid var(--bd);align-items:stretch}
+.mrow:last-child{border-bottom:none}
+.mrow.mh{background:rgba(255,255,255,.02)}
+.mc{flex:1;padding:11px 15px;font-size:.77rem;border-left:1px solid var(--bd);direction:rtl;line-height:1.55;display:flex;align-items:center}
+.mc:last-child{border-left:none}
+.mrow.mh .mc{font-weight:700;font-size:.7rem;color:var(--muted)}
 
-    .panel-head {
-      text-align: center;
-      padding: 22px 20px 20px;
-      border-bottom: 1px solid var(--border);
-      direction: rtl;
-    }
-
-    .panel-icon { font-size: 1.6rem; line-height: 1; margin-bottom: 6px; }
-
-    .panel-name {
-      font-size: 1.05rem;
-      font-weight: 900;
-      direction: ltr;
-      letter-spacing: 0.5px;
-    }
-
-    .panel-sub {
-      font-size: 0.73rem;
-      color: var(--muted);
-      margin-top: 5px;
-    }
-
-    .panel-badge {
-      display: inline-block;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 3px 11px;
-      border-radius: 10px;
-      margin-top: 10px;
-    }
-
-    .badge-osi { background: rgba(196,124,249,0.12); color: #c47cf9; border: 1px solid rgba(196,124,249,0.22); }
-    .badge-tcp { background: rgba(56,196,245,0.12); color: #38c4f5; border: 1px solid rgba(56,196,245,0.22); }
-
-    /* ── LAYERS CONTAINER ── */
-    .layers {
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: var(--gap);
-      direction: rtl;
-    }
-
-    .layer {
-      height: var(--layer-h);
-      border-radius: 10px;
-      padding: 0 14px;
-      cursor: default;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      transition: filter 0.22s ease, transform 0.18s ease;
-      animation: fadeUp 0.5s ease both;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* tinted background fill */
-    .layer::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: currentColor;
-      opacity: 0.1;
-      transition: opacity 0.2s;
-    }
-
-    /* left accent bar */
-    .layer::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 12px;
-      bottom: 12px;
-      width: 3px;
-      background: currentColor;
-      border-radius: 2px;
-      opacity: 0.7;
-    }
-
-    .layer:hover::before { opacity: 0.18; }
-    .layer:hover { transform: scale(1.013); }
-
-    .layer-body { position: relative; width: 100%; }
-
-    .l-num  { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; opacity: 0.45; letter-spacing: 2px; direction: ltr; }
-    .l-name { font-size: 0.88rem; font-weight: 800; margin: 2px 0; direction: ltr; }
-    .l-info { font-size: 0.68rem; opacity: 0.65; line-height: 1.45; }
-
-    /* ── group colors ── */
-    .g-app       { color: var(--c-app);       }
-    .g-transport { color: var(--c-transport); }
-    .g-internet  { color: var(--c-internet);  }
-    .g-access    { color: var(--c-access);    }
-
-    /* TCP/IP tall layers */
-    .tall-3 { height: calc(3 * var(--layer-h) + 2 * var(--gap)); }
-    .tall-2 { height: calc(2 * var(--layer-h) + 1 * var(--gap)); }
-
-    /* middle spacer col */
-    .conn-col { /* SVG overlay handles drawing */ }
-
-    /* ══════════════════════════════════════
-       DIFFERENCES SECTION
-    ══════════════════════════════════════ */
-    .section-label {
-      text-align: center;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .section-label::before,
-    .section-label::after {
-      content: '';
-      height: 1px;
-      width: 60px;
-      background: var(--border);
-    }
-
-    .diff-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 48px;
-    }
-
-    .diff-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 26px;
-      transition: transform 0.2s ease, border-color 0.2s;
-    }
-
-    .diff-card:hover { transform: translateY(-3px); }
-    .diff-card.dc-osi { border-top: 2px solid #c47cf9; }
-    .diff-card.dc-tcp { border-top: 2px solid #38c4f5; }
-
-    .diff-card h3 {
-      font-size: 1rem;
-      font-weight: 800;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .diff-card ul { list-style: none; }
-
-    .diff-card li {
-      font-size: 0.79rem;
-      color: var(--muted);
-      padding: 7px 0;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 9px;
-    }
-
-    .diff-card li:last-child { border-bottom: none; }
-
-    .li-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-
-    /* ══════════════════════════════════════
-       SUMMARY BAR
-    ══════════════════════════════════════ */
-    .summary {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 34px 28px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* decorative glow inside summary */
-    .summary::before {
-      content: '';
-      position: absolute;
-      top: -60%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 70%;
-      height: 200%;
-      background: radial-gradient(ellipse, rgba(181,124,240,0.06) 0%, transparent 60%);
-      pointer-events: none;
-    }
-
-    .summary h4 {
-      position: relative;
-      font-size: 0.78rem;
-      color: var(--muted);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 20px;
-    }
-
-    .pills {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .pill {
-      font-size: 0.85rem;
-      font-weight: 700;
-      padding: 11px 26px;
-      border-radius: 50px;
-      line-height: 1.4;
-    }
-
-    .pill-osi { background: rgba(196,124,249,0.1); border: 1px solid rgba(196,124,249,0.28); color: #c47cf9; }
-    .pill-tcp { background: rgba(56,196,245,0.1);  border: 1px solid rgba(56,196,245,0.28);  color: #38c4f5; }
-
-    /* ══════════════════════════════════════
-       RESPONSIVE
-    ══════════════════════════════════════ */
-    @media (max-width: 680px) {
-      .cmp-wrapper {
-        grid-template-columns: 1fr;
-        gap: 16px;
-        direction: rtl;
-      }
-      .conn-col { display: none; }
-      #conn-svg { display: none; }
-      .diff-grid { grid-template-columns: 1fr; }
-      .legend { gap: 12px; }
-    }
-  </style>
+/* QUIZ */
+.qwrap{max-width:680px;margin:0 auto}
+.qprog{background:var(--bd);border-radius:10px;height:5px;margin-bottom:28px;overflow:hidden}
+.qbar{height:100%;border-radius:10px;background:linear-gradient(90deg,#b57cf0,#3dd68c);transition:width .4s ease}
+.qnum{font-size:.64rem;letter-spacing:2px;color:var(--muted);font-weight:700;margin-bottom:10px}
+.qtxt{font-size:1.05rem;font-weight:800;line-height:1.55;margin-bottom:24px}
+.qopts{display:flex;flex-direction:column;gap:8px}
+.qopt{background:var(--bg2);border:1.5px solid var(--bd);border-radius:11px;padding:13px 17px;font-family:'Cairo',sans-serif;font-size:.82rem;font-weight:600;color:var(--text);cursor:pointer;text-align:right;transition:all .18s;width:100%}
+.qopt:hover:not([disabled]){border-color:rgba(181,124,240,.4);background:rgba(181,124,240,.07)}
+.qopt.ok{border-color:#3dd68c;background:rgba(61,214,140,.1);color:#3dd68c}
+.qopt.no{border-color:#f06b7a;background:rgba(240,107,122,.08);color:#f06b7a}
+.qfb{margin-top:15px;padding:12px 15px;border-radius:10px;font-size:.79rem;line-height:1.65;display:none}
+.qfb.show{display:block}
+.qfb.ok{background:rgba(61,214,140,.07);border:1px solid rgba(61,214,140,.2);color:#3dd68c}
+.qfb.no{background:rgba(240,107,122,.07);border:1px solid rgba(240,107,122,.2);color:#f5a0a8}
+.qnext{margin-top:16px;display:none;background:var(--surface);border:1px solid var(--bd);color:var(--text);font-family:'Cairo',sans-serif;font-size:.82rem;font-weight:700;padding:11px 22px;border-radius:10px;cursor:pointer;transition:all .2s}
+.qnext.show{display:inline-block}
+.qnext:hover{background:rgba(255,255,255,.07)}
+.score-sc{text-align:center;padding:40px 20px;display:none}
+.score-sc.show{display:block}
+.sc-em{font-size:3.5rem;margin-bottom:18px}
+.sc-n{font-size:2.8rem;font-weight:900;margin-bottom:8px}
+.sc-lb{font-size:.88rem;color:var(--muted);margin-bottom:28px;line-height:1.65}
+</style>
 </head>
 <body>
 <div class="page">
 
-  <!-- ── HEADER ── -->
-  <div class="header">
-    <div class="header-tag">🌐 Network Models</div>
-    <h1>
-      <span class="t-osi">OSI</span>
-      <span class="t-sep">&nbsp;vs&nbsp;</span>
-      <span class="t-tcp">TCP/IP</span>
-    </h1>
-    <p class="header-sub">مقارنة شاملة بين النموذجين الأساسيين في عالم الشبكات</p>
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-tag">🌐 Network Fundamentals</div>
+  <h1>
+    <span style="color:#c47cf9">OSI</span>
+    <span style="color:rgba(255,255,255,.12);font-weight:300"> و </span>
+    <span style="color:#38c4f5">TCP/IP</span>
+    <br>الدليل الشامل
+  </h1>
+  <p class="hdr-sub">كل ما تحتاجه لفهم نماذج الشبكات من الصفر حتى الاحتراف — بالعربي والإنجليزي</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tb on"  data-t="osi">🔵 OSI Model</button>
+  <button class="tb"     data-t="tcp">🟢 TCP/IP Model</button>
+  <button class="tb"     data-t="cmp">⚖️ المقارنة</button>
+  <button class="tb"     data-t="qz">🧠 اختبر نفسك</button>
+</div>
+
+<!-- OSI PANEL -->
+<div class="pnl on" id="p-osi">
+  <div class="intro">
+    <div class="intro-ico">🧠</div>
+    <div>
+      <h3>نموذج OSI — النموذج النظري المرجعي</h3>
+      <p>وضعته منظمة <strong>ISO</strong> عام 1984. يُقسّم عملية التواصل الشبكي إلى <strong>7 طبقات</strong> مستقلة، كل طبقة تؤدي مهمة محددة وتتواصل فقط مع الطبقتين المجاورتين لها. لا يُستخدم مباشرة في الإنترنت لكنه <strong>المرجع الأساسي</strong> لفهم كيف تعمل الشبكات.</p>
+    </div>
+  </div>
+  <div class="mnemo">
+    <div class="mnemo-ico">🔤</div>
+    <p><strong>حيلة حفظ الطبقات من الأسفل (1) للأعلى (7):</strong><br>
+    Physical · Data Link · Network · Transport · Session · Presentation · Application<br>
+    <strong>"Please Do Not Throw Sausage Pizza Away"</strong></p>
+  </div>
+  <div class="lcards" id="osi-cards"></div>
+
+  <!-- ENCAPSULATION DEMO -->
+  <div class="demo">
+    <h3>🚀 رحلة البيانات — التغليف (Encapsulation)</h3>
+    <p>كلما نزلنا طبقة في الـ OSI، تُضاف معلومات (Header) على البيانات. هذا يُسمى Encapsulation. شاهد كيف تتحوّل رسالة "مرحبا" إلى بيانات تسافر عبر الشبكة.</p>
+    <div class="demo-btns">
+      <button class="btn-p" id="btn-run">▶ شاهد رحلة البيانات</button>
+      <button class="btn-s" id="btn-rst">↺ إعادة</button>
+    </div>
+    <div class="eviz" id="eviz">
+      <div class="etitle">⬇ التغليف عند الإرسال — من طبقة 7 إلى 1</div>
+      <div id="erows"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TCP/IP PANEL -->
+<div class="pnl" id="p-tcp">
+  <div class="intro">
+    <div class="intro-ico">⚡</div>
+    <div>
+      <h3>نموذج TCP/IP — النموذج العملي للإنترنت</h3>
+      <p>طُوِّر في السبعينيات كأساس للإنترنت. يضمّ <strong>4 طبقات</strong> فقط تجمع وظائف نموذج OSI بشكل أبسط. هو النموذج الفعلي المستخدم في <strong>كل شبكة إنترنت</strong> اليوم — الهاتف والحاسوب والخوادم كلها تتحدث بلغة TCP/IP.</p>
+    </div>
+  </div>
+  <div class="lcards" id="tcp-cards"></div>
+</div>
+
+<!-- COMPARISON PANEL -->
+<div class="pnl" id="p-cmp">
+  <div class="cmp-intro">
+    <h4>⚖️ مقارنة OSI و TCP/IP</h4>
+    <p>OSI يقسّم العمل إلى 7 طبقات للتفصيل والوضوح، بينما TCP/IP يجمع بعض الطبقات معاً للعمل الفعلي. الألوان توضح أي طبقات في OSI تتوافق مع كل طبقة في TCP/IP.</p>
   </div>
 
-  <!-- ── LEGEND ── -->
-  <div class="legend">
-    <div class="legend-item">
-      <div class="legend-dot" style="background:var(--c-app)"></div>
-      <span>Application</span>
+  <!-- VISUAL COMPARISON -->
+  <div class="cmp-visual">
+    <div class="cmp-col">
+      <div class="cmp-head"><h3 style="color:#c47cf9">OSI Model</h3><span>نظري · 7 طبقات</span></div>
+      <div class="cmp-layers" id="cv-osi"></div>
     </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:var(--c-transport)"></div>
-      <span>Transport</span>
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:var(--c-internet)"></div>
-      <span>Internet / Network</span>
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:var(--c-access)"></div>
-      <span>Network Access / Physical</span>
-    </div>
-  </div>
-
-  <!-- ── COMPARISON ── -->
-  <div class="cmp-wrapper" id="cmpWrapper">
-
-    <!-- OSI Panel -->
-    <div class="panel" id="osiPanel">
-      <div class="panel-head">
-        <div class="panel-icon">🧠</div>
-        <div class="panel-name" style="color:#c47cf9">OSI Model</div>
-        <div class="panel-sub">نموذج نظري / تعليمي</div>
-        <span class="panel-badge badge-osi">7 layers</span>
-      </div>
-      <div class="layers" id="osiLayers">
-        <div class="layer g-app"       data-g="app"       style="animation-delay:.04s">
-          <div class="layer-body">
-            <div class="l-num">LAYER 7</div>
-            <div class="l-name">Application</div>
-            <div class="l-info">HTTP · FTP · SMTP · DNS</div>
-          </div>
-        </div>
-        <div class="layer g-app"       data-g="app"       style="animation-delay:.10s">
-          <div class="layer-body">
-            <div class="l-num">LAYER 6</div>
-            <div class="l-name">Presentation</div>
-            <div class="l-info">تشفير + ضغط البيانات</div>
-          </div>
-        </div>
-        <div class="layer g-app"       data-g="app"       style="animation-delay:.16s">
-          <div class="layer-body">
-            <div class="l-num">LAYER 5</div>
-            <div class="l-name">Session</div>
-            <div class="l-info">إدارة الجلسات</div>
-          </div>
-        </div>
-        <div class="layer g-transport" data-g="transport" style="animation-delay:.22s">
-          <div class="layer-body">
-            <div class="l-num">LAYER 4</div>
-            <div class="l-name">Transport</div>
-            <div class="l-info">TCP · UDP</div>
-          </div>
-        </div>
-        <div class="layer g-internet"  data-g="internet"  style="animation-delay:.28s">
-          <div class="layer-body">
-            <div class="l-num">LAYER 3</div>
-            <div class="l-name">Network</div>
-            <div class="l-info">IP Routing</div>
-          </div>
-        </div>
-        <div class="layer g-access"    data-g="access"    style="animation-delay:.34s">
-          <div class="layer-body">
-            <div class="l-num">LAYER 2</div>
-            <div class="l-name">Data Link</div>
-            <div class="l-info">MAC Address · تصحيح الأخطاء</div>
-          </div>
-        </div>
-        <div class="layer g-access"    data-g="access"    style="animation-delay:.40s">
-          <div class="layer-body">
-            <div class="l-num">LAYER 1</div>
-            <div class="l-name">Physical</div>
-            <div class="l-info">نقل الإشارات الكهربائية</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Connector spacer column -->
-    <div class="conn-col"></div>
-
-    <!-- TCP/IP Panel -->
-    <div class="panel" id="tcpPanel">
-      <div class="panel-head">
-        <div class="panel-icon">⚡</div>
-        <div class="panel-name" style="color:#38c4f5">TCP/IP Model</div>
-        <div class="panel-sub">نموذج عملي / الإنترنت</div>
-        <span class="panel-badge badge-tcp">4 layers</span>
-      </div>
-      <div class="layers" id="tcpLayers">
-        <div class="layer tall-3 g-app"       data-g="app"       style="animation-delay:.07s">
-          <div class="layer-body">
-            <div class="l-num">LAYER 4</div>
-            <div class="l-name">Application</div>
-            <div class="l-info">HTTP · FTP · DNS · SMTP<br>يشمل طبقات 5، 6، 7 من OSI</div>
-          </div>
-        </div>
-        <div class="layer g-transport"        data-g="transport" style="animation-delay:.19s">
-          <div class="layer-body">
-            <div class="l-num">LAYER 3</div>
-            <div class="l-name">Transport</div>
-            <div class="l-info">TCP · UDP</div>
-          </div>
-        </div>
-        <div class="layer g-internet"         data-g="internet"  style="animation-delay:.28s">
-          <div class="layer-body">
-            <div class="l-num">LAYER 2</div>
-            <div class="l-name">Internet</div>
-            <div class="l-info">IP Routing</div>
-          </div>
-        </div>
-        <div class="layer tall-2 g-access"    data-g="access"    style="animation-delay:.37s">
-          <div class="layer-body">
-            <div class="l-num">LAYER 1</div>
-            <div class="l-name">Network Access</div>
-            <div class="l-info">Physical + Data Link<br>إشارات + MAC Address</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SVG connector overlay -->
-    <svg id="conn-svg" style="position:absolute;top:0;left:0;pointer-events:none;overflow:visible;"></svg>
-  </div>
-
-  <!-- ── DIFFERENCES ── -->
-  <div class="section-label">⚖️ الفروقات الرئيسية</div>
-  <div class="diff-grid">
-    <div class="diff-card dc-osi">
-      <h3 style="color:#c47cf9">🧠 OSI Model</h3>
-      <ul>
-        <li><span class="li-dot" style="background:var(--c-app)"></span>نموذج نظري وتعليمي</li>
-        <li><span class="li-dot" style="background:var(--c-app)"></span>7 طبقات مفصلة</li>
-        <li><span class="li-dot" style="background:var(--c-app)"></span>أكثر تفصيلاً ودقة</li>
-        <li><span class="li-dot" style="background:var(--c-app)"></span>يُستخدم لفهم الشبكات</li>
-        <li><span class="li-dot" style="background:var(--c-app)"></span>لا يُطبق مباشرة في الإنترنت</li>
-      </ul>
-    </div>
-    <div class="diff-card dc-tcp">
-      <h3 style="color:#38c4f5">⚡ TCP/IP Model</h3>
-      <ul>
-        <li><span class="li-dot" style="background:#38c4f5"></span>نموذج عملي وفعلي</li>
-        <li><span class="li-dot" style="background:#38c4f5"></span>4 طبقات أبسط وأوضح</li>
-        <li><span class="li-dot" style="background:#38c4f5"></span>أسرع وأسهل في التطبيق</li>
-        <li><span class="li-dot" style="background:#38c4f5"></span>أساس الإنترنت الحديث</li>
-        <li><span class="li-dot" style="background:#38c4f5"></span>يُستخدم في كل الشبكات فعلياً</li>
-      </ul>
+    <div class="cmp-col">
+      <div class="cmp-head"><h3 style="color:#38c4f5">TCP/IP Model</h3><span>عملي · 4 طبقات</span></div>
+      <div class="cmp-layers" id="cv-tcp"></div>
     </div>
   </div>
 
-  <!-- ── SUMMARY ── -->
-  <div class="summary">
-    <h4>💡 الخلاصة للحفظ</h4>
-    <div class="pills">
-      <span class="pill pill-osi">OSI &nbsp;=&nbsp; فهم الشبكات &nbsp;(7 طبقات)</span>
-      <span class="pill pill-tcp">TCP/IP &nbsp;=&nbsp; تطبيق الإنترنت &nbsp;(4 طبقات)</span>
+  <!-- MAPPING TABLE -->
+  <div style="font-size:.88rem;font-weight:800;margin-bottom:12px">🔗 جدول التطابق بين النموذجين</div>
+  <div class="maptbl" id="maptbl"></div>
+
+  <!-- DIFF TABLE -->
+  <div style="font-size:.88rem;font-weight:800;margin-bottom:12px;margin-top:24px">📊 الفروقات الرئيسية</div>
+  <div class="dtbl">
+    <div class="dr dh"><div class="dc">المعيار</div><div class="dc" style="color:#c47cf9">OSI Model</div><div class="dc" style="color:#38c4f5">TCP/IP Model</div></div>
+    <div class="dr"><div class="dc">عدد الطبقات</div><div class="dc">7 طبقات</div><div class="dc">4 طبقات</div></div>
+    <div class="dr"><div class="dc">النوع</div><div class="dc">نموذج نظري مرجعي</div><div class="dc">نموذج تطبيقي فعلي</div></div>
+    <div class="dr"><div class="dc">الجهة المطوِّرة</div><div class="dc">ISO (1984)</div><div class="dc">DoD / DARPA (1970s)</div></div>
+    <div class="dr"><div class="dc">الاستخدام</div><div class="dc">مرجع لفهم الشبكات وتدريس</div><div class="dc">أساس الإنترنت الفعلي اليوم</div></div>
+    <div class="dr"><div class="dc">Session + Presentation</div><div class="dc">طبقتان مستقلتان (5 و 6)</div><div class="dc">مدمجتان في Application</div></div>
+    <div class="dr"><div class="dc">Physical + Data Link</div><div class="dc">طبقتان مستقلتان (1 و 2)</div><div class="dc">مدمجتان في Network Access</div></div>
+    <div class="dr"><div class="dc">مستوى التفصيل</div><div class="dc">مفصّل وأوضح للتعليم</div><div class="dc">أبسط وأسرع للتطبيق</div></div>
+    <div class="dr"><div class="dc">البروتوكولات</div><div class="dc">لا يحدد بروتوكولات بعينها</div><div class="dc">مبني حول TCP و IP</div></div>
+  </div>
+</div>
+
+<!-- QUIZ PANEL -->
+<div class="pnl" id="p-qz">
+  <div class="intro" style="margin-bottom:28px">
+    <div class="intro-ico">🧠</div>
+    <div>
+      <h3>اختبر معلوماتك</h3>
+      <p>10 أسئلة تغطي كل ما تعلّمته. لكل سؤال شرح فوري للإجابة الصحيحة.</p>
     </div>
   </div>
+  <div class="qwrap">
+    <div class="qprog"><div class="qbar" id="qbar" style="width:0%"></div></div>
+    <div id="qbody"></div>
+    <div class="score-sc" id="qscore"></div>
+  </div>
+</div>
 
 </div><!-- /page -->
 
 <script>
-  /* ═══════════════════════════════════
-     Draw SVG connector lines
-  ═══════════════════════════════════ */
-  const GROUPS = [
-    { osiIdxs: [0, 1, 2], tcpIdx: 0, color: '#b57cf0' }, // app
-    { osiIdxs: [3],       tcpIdx: 1, color: '#3dd68c' }, // transport
-    { osiIdxs: [4],       tcpIdx: 2, color: '#f5a623' }, // internet
-    { osiIdxs: [5, 6],    tcpIdx: 3, color: '#f06b7a' }, // access
-  ];
-
-  function mkSVGEl(tag, attrs) {
-    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
-    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
-    return el;
+/* ═══════════ DATA ═══════════ */
+const OSI_DATA = [
+  {
+    num:7, ar:"طبقة التطبيقات", en:"Application Layer", kw:"التطبيق", color:"#c47cf9", pdu:"Data",
+    far:"البوابة المباشرة بين المستخدم والشبكة. كل تطبيق تستخدمه — متصفح، بريد إلكتروني، FTP — يتفاعل مع هذه الطبقة مباشرة لطلب خدمات الشبكة ونقل البيانات.",
+    fen:"Interface between user applications and the network. Provides network services directly to end-user applications like browsers and email clients.",
+    protos:["HTTP","HTTPS","FTP","SMTP","POP3","IMAP","DNS","DHCP","SSH","Telnet","SNMP"],
+    devs:["Gateway","Firewall","Proxy Server"],
+    analogy:{em:"🍕", txt:"مثل <strong>نافذة المطعم</strong> — أنت تطلب الطعام مباشرة دون أن تهتم بكيفية الطبخ أو التسليم"},
+    tip:"💡 HTTP يعمل على بورت 80 — وHTTPS (المشفّر بـ TLS) يعمل على بورت 443"
+  },
+  {
+    num:6, ar:"طبقة العرض", en:"Presentation Layer", kw:"التحويل", color:"#9b6de0", pdu:"Data",
+    far:"تهيّئ البيانات لتكون قابلة للاستخدام: تُشفّرها لحماية خصوصيتك، تضغطها لتوفير النطاق الترددي، وتحوّل الصيغ لضمان أن الطرف الآخر يفهمها بشكل صحيح.",
+    fen:"Translates data formats, handles encryption/decryption, and compression. Ensures data is in a readable format for the Application layer.",
+    protos:["SSL","TLS","JPEG","MPEG","GIF","PNG","ASCII","Unicode","Base64"],
+    devs:[],
+    analogy:{em:"🌐", txt:"مثل <strong>المترجم الفوري</strong> في مؤتمر دولي — يحوّل ما تقوله إلى لغة يفهمها الطرف الآخر بالضبط"},
+    tip:"💡 الـ HTTPS آمن بفضل TLS (المعروف سابقاً بـ SSL) الذي يعمل في هذه الطبقة"
+  },
+  {
+    num:5, ar:"طبقة الجلسة", en:"Session Layer", kw:"الجلسة", color:"#7e5fd0", pdu:"Data",
+    far:"تُنشئ الاتصالات (Sessions) بين التطبيقات، تحافظ عليها، وتُنهيها. تدعم أيضاً نقاط الاستئناف: إذا انقطع اتصال تحميل ملف كبير، يُمكن الاستمرار من حيث توقف.",
+    fen:"Establishes, manages, and terminates sessions between applications. Handles authentication, authorization, and session checkpointing for recovery.",
+    protos:["NetBIOS","PPTP","NFS","SQL","RPC","SIP"],
+    devs:[],
+    analogy:{em:"📞", txt:"مثل <strong>موظف مركز الاتصالات</strong> — يفتح الاتصال، يراقبه ويديره، ويُنهيه بشكل منظّم عند الانتهاء"},
+    tip:"💡 لما تبقى مسجّلاً في موقع بعد إغلاق المتصفح وإعادة فتحه — طبقة الجلسة مسؤولة عن ذلك"
+  },
+  {
+    num:4, ar:"طبقة النقل", en:"Transport Layer", kw:"النقل", color:"#3dd68c", pdu:"Segment / Datagram",
+    far:"تضمن نقلاً موثوقاً ومنظّماً بين الطرفين النهائيين. تُقسّم البيانات الكبيرة إلى Segments صغيرة، تضيف أرقام تسلسل لضمان الترتيب، وتُعيد الإرسال إذا ضاعت أي قطعة.",
+    fen:"Provides end-to-end reliable data transfer, error recovery, and flow control. Segments data and ensures all segments arrive in the correct order.",
+    protos:["TCP (موثوق + مرتّب)","UDP (سريع + غير مضمون)","SCTP"],
+    devs:["Firewall","Load Balancer"],
+    analogy:{em:"📦", txt:"مثل <strong>شركة الشحن DHL</strong> — تُقسّم الشحنة، تُرقّم كل صندوق، وتضمن وصول كل شيء بالترتيب الصحيح"},
+    tip:"💡 TCP يبدأ كل اتصال بـ Three-Way Handshake: SYN → SYN-ACK → ACK"
+  },
+  {
+    num:3, ar:"طبقة الشبكة", en:"Network Layer", kw:"التوجيه", color:"#f5c842", pdu:"Packet (حزمة)",
+    far:"تُحدّد أفضل مسار لإيصال الحزم من المُرسِل إلى المُستقبِل عبر شبكات متعددة. تستخدم عنوان IP الفريد لكل جهاز للتعرف على المصدر والوجهة.",
+    fen:"Determines the best path to route packets across multiple networks using logical IP addressing. Handles routing decisions.",
+    protos:["IPv4","IPv6","ICMP","IGMP","ARP","OSPF","BGP","RIP"],
+    devs:["Router","Layer 3 Switch"],
+    analogy:{em:"🗺️", txt:"مثل <strong>نظام GPS</strong> — يعرف جميع الطرق المتاحة ويختار الأسرع والأقصر لإيصالك للوجهة"},
+    tip:"💡 أمر ping يستخدم بروتوكول ICMP الذي يعمل في هذه الطبقة"
+  },
+  {
+    num:2, ar:"طبقة ربط البيانات", en:"Data Link Layer", kw:"الربط", color:"#f59042", pdu:"Frame (إطار)",
+    far:"تتحكم في نقل البيانات بين جهازين متصلين مباشرة في نفس الشبكة. تستخدم عنوان MAC للتعرّف على الأجهزة، تكتشف الأخطاء وتصحّحها. مقسّمة إلى: MAC layer و LLC layer.",
+    fen:"Controls data transfer between directly connected nodes using MAC addresses. Handles error detection, correction, and frame synchronization.",
+    protos:["Ethernet 802.3","Wi-Fi 802.11","PPP","ARP","HDLC"],
+    devs:["Switch","Bridge","NIC"],
+    analogy:{em:"🏘️", txt:"مثل <strong>ساعي البريد داخل الحي</strong> — يعرف عناوين جميع المنازل المجاورة ويُوصّل الطرود مباشرة"},
+    tip:"💡 عنوان MAC مكوّن من 48 بت (6 bytes) ومحفور في بطاقة الشبكة من المصنع"
+  },
+  {
+    num:1, ar:"الطبقة المادية", en:"Physical Layer", kw:"الإشارة", color:"#f06b7a", pdu:"Bit (0 أو 1)",
+    far:"الطبقة الأساسية الأدنى. تتعامل مع النقل الفعلي للبتات (0 و1) عبر الوسط المادي: أسلاك نحاسية، ألياف بصرية، أو موجات لاسلكية. تُحدّد خصائص الإشارات والموصّلات.",
+    fen:"Transmits raw bits over a physical medium. Defines electrical, optical, and wireless signal specifications and connector types.",
+    protos:["Ethernet Cable","Fiber Optic","Wi-Fi RF","USB","Bluetooth","DSL","HDMI"],
+    devs:["Hub","Repeater","NIC","Cables","Fiber"],
+    analogy:{em:"🛣️", txt:"مثل <strong>الطريق الأسفلتي</strong> — هو الوسيلة المادية الفعلية التي تنتقل عليها البيانات (كالسيارات على الطريق)"},
+    tip:"💡 الألياف البصرية Fiber Optic تنقل البيانات بالضوء — أسرع بكثير من الأسلاك النحاسية"
   }
+];
 
-  function drawLines() {
-    const svg     = document.getElementById('conn-svg');
-    const wrapper = document.getElementById('cmpWrapper');
-    const osiEls  = [...document.querySelectorAll('#osiLayers .layer')];
-    const tcpEls  = [...document.querySelectorAll('#tcpLayers .layer')];
-    const wR      = wrapper.getBoundingClientRect();
-
-    svg.setAttribute('width',  wR.width);
-    svg.setAttribute('height', wR.height);
-    svg.innerHTML = '';
-
-    GROUPS.forEach(({ osiIdxs, tcpIdx, color }) => {
-      const tcpEl   = tcpEls[tcpIdx];
-      const tcpRect = tcpEl.getBoundingClientRect();
-      const tcpCY   = tcpRect.top  - wR.top + tcpRect.height / 2;
-      const tcpX    = tcpRect.left - wR.left; // left edge of TCP panel
-
-      osiIdxs.forEach(idx => {
-        const osiEl   = osiEls[idx];
-        const osiRect = osiEl.getBoundingClientRect();
-        const osiCY   = osiRect.top   - wR.top + osiRect.height / 2;
-        const osiX    = osiRect.right - wR.left; // right edge of OSI panel
-
-        svg.appendChild(mkSVGEl('line', {
-          x1: osiX, y1: osiCY, x2: tcpX, y2: tcpCY,
-          stroke: color, 'stroke-width': '1.5',
-          'stroke-dasharray': '5 4', opacity: '0.42'
-        }));
-
-        // dot on OSI side
-        svg.appendChild(mkSVGEl('circle', {
-          cx: osiX, cy: osiCY, r: '3.5',
-          fill: color, opacity: '0.65'
-        }));
-      });
-
-      // dot on TCP side
-      svg.appendChild(mkSVGEl('circle', {
-        cx: tcpX, cy: tcpCY, r: '3.5',
-        fill: color, opacity: '0.65'
-      }));
-    });
+const TCP_DATA = [
+  {
+    num:4, ar:"طبقة التطبيقات", en:"Application Layer", kw:"التطبيق", color:"#c47cf9",
+    omap:"يجمع: OSI Layers 5 + 6 + 7", pdu:"Data",
+    far:"تجمع في طبقة واحدة كل ما يتعلق بالتطبيقات: واجهة المستخدم (Application)، تشفير البيانات وضغطها (Presentation)، وإدارة الجلسات (Session). كل ما يستخدمه التطبيق مباشرة.",
+    fen:"Combines OSI's Application, Presentation, and Session layers. Provides all services needed by applications including formatting, encryption, and session management.",
+    protos:["HTTP/HTTPS","FTP","DNS","SMTP","POP3","IMAP","SSH","DHCP","Telnet","SNMP"],
+    devs:["Gateway","Firewall","Proxy"],
+    analogy:{em:"📱", txt:"الطبقة الشاملة للتطبيقات — تتعامل مع كل ما يراه المستخدم ويتفاعل معه مباشرة"},
+    tip:"💡 أوسع من نظيرتها في OSI — تجمع 3 طبقات في طبقة واحدة لأن التطبيقات تتولى هذه الوظائف معاً"
+  },
+  {
+    num:3, ar:"طبقة النقل", en:"Transport Layer", kw:"النقل", color:"#3dd68c",
+    omap:"يعادل: OSI Layer 4", pdu:"Segment / Datagram",
+    far:"نفس وظيفة طبقة النقل في OSI: نقل البيانات End-to-End بين التطبيقات. TCP لضمان الموثوقية والترتيب، وUDP للسرعة عند الحاجة (مثل بث الفيديو والألعاب).",
+    fen:"Same as OSI Transport Layer. Provides end-to-end communication. TCP ensures reliability, UDP prioritizes speed.",
+    protos:["TCP","UDP","SCTP"],
+    devs:["Firewall","Load Balancer"],
+    analogy:{em:"📦", txt:"مثل شركة الشحن — تُقسّم البيانات وتضمن وصولها بالترتيب الصحيح عبر TCP، أو ترسلها سريعاً بدون ضمان عبر UDP"},
+    tip:"💡 TCP للموثوقية (HTTP, Email) — UDP للسرعة (DNS, Streaming, Gaming)"
+  },
+  {
+    num:2, ar:"طبقة الإنترنت", en:"Internet Layer", kw:"التوجيه", color:"#f5c842",
+    omap:"يعادل: OSI Layer 3", pdu:"Packet (حزمة)",
+    far:"قلب الإنترنت. تُوجّه الحزم عبر الشبكات المختلفة باستخدام عناوين IP. بدون هذه الطبقة ما أمكن التواصل بين شبكات مختلفة في دول مختلفة.",
+    fen:"The heart of the Internet. Routes packets across multiple networks using IP addresses. Enables communication between different networks worldwide.",
+    protos:["IPv4","IPv6","ICMP","IGMP","ARP"],
+    devs:["Router","Layer 3 Switch"],
+    analogy:{em:"🌍", txt:"قلب الإنترنت — تُحدّد كيف تصل حزمة بيانات من شبكة في فلسطين إلى خادم في كاليفورنيا"},
+    tip:"💡 الـ IP هو بروتوكول هذه الطبقة — يُعطي كل جهاز عنواناً فريداً على الإنترنت"
+  },
+  {
+    num:1, ar:"طبقة الوصول للشبكة", en:"Network Access Layer", kw:"الوصول", color:"#f06b7a",
+    omap:"يجمع: OSI Layers 1 + 2", pdu:"Frame / Bit",
+    far:"تجمع في طبقة واحدة كل ما يتعلق بالاتصال المادي: عناوين MAC لتحديد الأجهزة، الإطارات (Frames) للنقل، والإشارات الفيزيائية عبر الأسلاك أو اللاسلكي.",
+    fen:"Combines Physical and Data Link layers. Handles MAC addressing, frame creation, and physical bit transmission over cables, fiber, or wireless.",
+    protos:["Ethernet","Wi-Fi 802.11","PPP","ARP","Frame Relay"],
+    devs:["Switch","Hub","NIC","Cables"],
+    analogy:{em:"🔌", txt:"كل الأجهزة والبروتوكولات التي تربطك فعلياً بالشبكة — من الكابل في الجدار حتى بطاقة الشبكة في حاسوبك"},
+    tip:"💡 لأن TCP/IP صُمّم للعمل الفعلي، جمع الطبقتين المادية وربط البيانات في طبقة واحدة"
   }
+];
 
-  document.fonts.ready.then(() => requestAnimationFrame(drawLines));
-  window.addEventListener('resize', drawLines);
-  // Also draw after all animations settle
-  setTimeout(drawLines, 600);
+const QUIZ = [
+  { q:"أي طبقة في OSI مسؤولة مباشرة عن عنوان MAC؟",
+    opts:["Network (3)","Transport (4)","Data Link (2)","Physical (1)"], ans:2,
+    exp:"طبقة Data Link (Layer 2) هي المسؤولة عن عناوين MAC وتحديد الأجهزة في نفس الشبكة المحلية. أما IP فهو في Network (3)." },
+  { q:"ما اسم وحدة البيانات (PDU) في طبقة النقل عند استخدام TCP؟",
+    opts:["Packet","Frame","Segment","Bit"], ans:2,
+    exp:"مع TCP نُسمّي الوحدة Segment (تشمل TCP Header + Data). ومع UDP نُسمّيها Datagram." },
+  { q:"أي من البروتوكولات التالية يعمل في طبقة Network في OSI؟",
+    opts:["HTTP","TCP","Ethernet","IP"], ans:3,
+    exp:"IP (وأيضاً ICMP, OSPF, BGP) هو بروتوكول طبقة Network (Layer 3). HTTP في Application، TCP في Transport، Ethernet في Data Link." },
+  { q:"كم عدد طبقات نموذج TCP/IP؟",
+    opts:["5","4","7","3"], ans:1,
+    exp:"TCP/IP يتكون من 4 طبقات: Application, Transport, Internet, Network Access. بينما OSI يتكون من 7 طبقات." },
+  { q:"أي طبقة في OSI تتولى التشفير (TLS/SSL) وضغط البيانات؟",
+    opts:["Application (7)","Session (5)","Presentation (6)","Transport (4)"], ans:2,
+    exp:"طبقة Presentation (Layer 6) هي المسؤولة عن التشفير والضغط وتحويل صيغ البيانات." },
+  { q:"ما الجهاز الشبكي المرتبط أساساً بطبقة Network في OSI؟",
+    opts:["Switch","Hub","Router","Repeater"], ans:2,
+    exp:"الـ Router يعمل في طبقة Network ويتخذ قرارات التوجيه بناءً على عناوين IP. بينما Switch يعمل في Data Link." },
+  { q:"بروتوكول UDP يعمل على أي طبقة في OSI؟",
+    opts:["Network (3)","Application (7)","Transport (4)","Data Link (2)"], ans:2,
+    exp:"UDP هو بروتوكول طبقة Transport (Layer 4) — يُستخدم عند الحاجة للسرعة أكثر من الموثوقية مثل بث الفيديو والألعاب." },
+  { q:"طبقة Application في TCP/IP تعادل كم طبقة في OSI؟",
+    opts:["طبقة واحدة","طبقتين","ثلاث طبقات","أربع طبقات"], ans:2,
+    exp:"طبقة Application في TCP/IP تجمع 3 طبقات من OSI: Application (7) + Presentation (6) + Session (5)." },
+  { q:"ما وحدة البيانات (PDU) في الطبقة المادية (Physical Layer)؟",
+    opts:["Frame","Packet","Segment","Bit"], ans:3,
+    exp:"في Physical Layer نتعامل مع أصغر وحدة بيانات وهي الـ Bit (0 أو 1)." },
+  { q:"أي البروتوكولين يضمن التسليم الموثوق والمرتّب للبيانات؟",
+    opts:["UDP","IP","TCP","ARP"], ans:2,
+    exp:"TCP (Transmission Control Protocol) يضمن وصول البيانات بالترتيب الصحيح ويُعيد الإرسال إذا فُقدت أي حزمة." }
+];
 
-  /* ═══════════════════════════════════
-     Hover: highlight matching group
-  ═══════════════════════════════════ */
-  const allLayers = document.querySelectorAll('.layer');
+/* ═══════════ HELPERS ═══════════ */
+function rgb(hex){
+  return `${parseInt(hex.slice(1,3),16)},${parseInt(hex.slice(3,5),16)},${parseInt(hex.slice(5,7),16)}`;
+}
 
-  allLayers.forEach(el => {
-    el.addEventListener('mouseenter', () => {
-      const g = el.dataset.g;
-      allLayers.forEach(l => {
-        l.style.filter = l.dataset.g === g
-          ? 'brightness(1.35) saturate(1.2)'
-          : 'brightness(0.38) saturate(0.3)';
-      });
-    });
-    el.addEventListener('mouseleave', () => {
-      allLayers.forEach(l => {
-        l.style.filter = '';
-        l.style.transition = 'filter 0.3s ease, transform 0.18s ease';
-      });
-    });
+/* ═══════════ RENDER OSI CARDS ═══════════ */
+function buildCard(l, idx, isTCP){
+  const c = l.color, r = rgb(c);
+  const devHtml = (l.devs||[]).length
+    ? `<div class="is" style="margin-bottom:13px">
+        <h5>الأجهزة المرتبطة</h5>
+        <div class="devs">${l.devs.map(d=>`<span class="dev">${d}</span>`).join('')}</div>
+       </div>` : '';
+  const omapHtml = isTCP
+    ? `<div class="omap" style="background:rgba(${r},.1);color:${c};border:1px solid rgba(${r},.22)">🔗 ${l.omap}</div>` : '';
+  return `
+  <div class="lc" style="animation-delay:${idx*.07}s" data-id="${idx}">
+    <div class="lc-head">
+      <div class="lnum" style="background:rgba(${r},.12);color:${c}">
+        <span class="lnum-n">${l.num}</span><span class="lnum-l">LAYER</span>
+      </div>
+      <div class="ltitles">
+        <div class="lname-ar" style="color:${c}">${l.ar}</div>
+        <div class="lname-en">${l.en}</div>
+      </div>
+      <span class="lpdu">${l.pdu}</span>
+      <span class="lkw" style="background:rgba(${r},.1);color:${c}">${l.kw}</span>
+      <span class="larr">▼</span>
+    </div>
+    <div class="lb">
+      <div class="lcont">
+        ${omapHtml}
+        <div class="ig">
+          <div class="is">
+            <h5>الوظيفة</h5>
+            <p>${l.far}</p>
+          </div>
+          <div class="is">
+            <h5>Function (EN)</h5>
+            <p class="en-p">${l.fen}</p>
+          </div>
+        </div>
+        <div class="is" style="margin-bottom:13px">
+          <h5>البروتوكولات</h5>
+          <div class="protos">${l.protos.map(p=>`<span class="proto" style="background:rgba(${r},.1);color:${c};border:1px solid rgba(${r},.2)">${p}</span>`).join('')}</div>
+        </div>
+        ${devHtml}
+        <div class="analo" style="border-right:3px solid rgba(${r},.4)">
+          <div class="analo-em">${l.analogy.em}</div>
+          <div class="analo-tx">${l.analogy.txt}</div>
+        </div>
+        <div class="tip" style="border-right-color:${c}">${l.tip}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('osi-cards').innerHTML = OSI_DATA.map((l,i)=>buildCard(l,i,false)).join('');
+document.getElementById('tcp-cards').innerHTML = TCP_DATA.map((l,i)=>buildCard(l,i,true)).join('');
+
+/* ═══════════ CARD TOGGLE ═══════════ */
+document.addEventListener('click', e => {
+  const head = e.target.closest('.lc-head');
+  if(!head) return;
+  const card = head.parentElement;
+  const wasOpen = card.classList.contains('op');
+  card.closest('.lcards').querySelectorAll('.lc.op').forEach(c=>{ if(c!==card) c.classList.remove('op'); });
+  card.classList.toggle('op', !wasOpen);
+});
+
+/* ═══════════ TABS ═══════════ */
+document.querySelectorAll('.tb').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tb').forEach(b=>b.classList.remove('on'));
+    document.querySelectorAll('.pnl').forEach(p=>p.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('p-'+btn.dataset.t).classList.add('on');
   });
+});
+
+/* ═══════════ ENCAPSULATION DEMO ═══════════ */
+const ROWS = [
+  { label:"Layer 7\nالتطبيقات", hdrs:[], pay:"مرحبا (رسالة المستخدم)", ftr:null, pdu:"Data", c:"#c47cf9" },
+  { label:"Layer 6\nالعرض",     hdrs:[{l:"ENC",c:"#9b6de0"}], pay:"مرحبا (مُشفَّر)", ftr:null, pdu:"Data", c:"#9b6de0" },
+  { label:"Layer 5\nالجلسة",    hdrs:[{l:"SES",c:"#7e5fd0"},{l:"ENC",c:"#9b6de0"}], pay:"مرحبا", ftr:null, pdu:"Data", c:"#7e5fd0" },
+  { label:"Layer 4\nالنقل",     hdrs:[{l:"TCP HDR",c:"#3dd68c"},{l:"SES",c:"#7e5fd0"},{l:"ENC",c:"#9b6de0"}], pay:"مرحبا", ftr:null, pdu:"Segment", c:"#3dd68c" },
+  { label:"Layer 3\nالشبكة",    hdrs:[{l:"IP HDR",c:"#f5c842"},{l:"TCP",c:"#3dd68c"},{l:"...",c:"#7e5fd0"}], pay:"مرحبا", ftr:null, pdu:"Packet", c:"#f5c842" },
+  { label:"Layer 2\nالربط",     hdrs:[{l:"MAC",c:"#f59042"},{l:"IP",c:"#f5c842"},{l:"TCP...",c:"#3dd68c"}], pay:"مرحبا", ftr:{l:"FCS",c:"#f59042"}, pdu:"Frame", c:"#f59042" },
+  { label:"Layer 1\nالمادية",   hdrs:[], pay:"01001101 01110010 01001000 11010110 ...", ftr:null, pdu:"Bits", c:"#f06b7a" },
+];
+
+document.getElementById('erows').innerHTML = ROWS.map(r=>{
+  const rb = rgb(r.c);
+  const hh = r.hdrs.map(h=>`<div class="ehdr" style="background:rgba(${rgb(h.c)},.28);color:${h.c}">${h.l}</div>`).join('');
+  const fh = r.ftr ? `<div class="eftr" style="background:rgba(${rgb(r.ftr.c)},.28);color:${r.ftr.c}">${r.ftr.l}</div>` : '';
+  return `
+  <div class="erow">
+    <div class="eln" style="color:${r.c}">${r.label.replace('\n','<br>')}</div>
+    <div class="ebar" style="border:1px solid rgba(${rb},.3)">${hh}<div class="epay">${r.pay}</div>${fh}</div>
+    <div class="epdu" style="color:${r.c}">${r.pdu}</div>
+  </div>`;
+}).join('');
+
+let running = false;
+document.getElementById('btn-run').addEventListener('click',()=>{
+  if(running) return; running=true;
+  const viz = document.getElementById('eviz');
+  viz.classList.add('show');
+  viz.querySelectorAll('.erow').forEach(r=>r.classList.remove('in'));
+  viz.querySelectorAll('.erow').forEach((r,i)=>{
+    setTimeout(()=>{ r.classList.add('in'); if(i===ROWS.length-1) running=false; }, i*500);
+  });
+});
+document.getElementById('btn-rst').addEventListener('click',()=>{
+  running=false;
+  const viz=document.getElementById('eviz');
+  viz.classList.remove('show');
+  viz.querySelectorAll('.erow').forEach(r=>r.classList.remove('in'));
+});
+
+/* ═══════════ COMPARISON VISUAL ═══════════ */
+const CV_OSI = [
+  {ar:"التطبيقات",en:"Application",c:"#c47cf9",num:7,h:52},
+  {ar:"العرض",en:"Presentation",c:"#9b6de0",num:6,h:52},
+  {ar:"الجلسة",en:"Session",c:"#7e5fd0",num:5,h:52},
+  {ar:"النقل",en:"Transport",c:"#3dd68c",num:4,h:52},
+  {ar:"الشبكة",en:"Network",c:"#f5c842",num:3,h:52},
+  {ar:"ربط البيانات",en:"Data Link",c:"#f59042",num:2,h:52},
+  {ar:"المادية",en:"Physical",c:"#f06b7a",num:1,h:52}
+];
+const CV_TCP = [
+  {ar:"التطبيقات",en:"Application",c:"#c47cf9",num:4,h:172},
+  {ar:"النقل",en:"Transport",c:"#3dd68c",num:3,h:52},
+  {ar:"الإنترنت",en:"Internet",c:"#f5c842",num:2,h:52},
+  {ar:"الوصول للشبكة",en:"Network Access",c:"#f06b7a",num:1,h:112}
+];
+
+function buildCL(l){
+  const r=rgb(l.c);
+  return `<div class="cl" style="height:${l.h}px;color:${l.c}">
+    <div class="cl-txt">
+      <div class="cl-ar">${l.num}. ${l.ar}</div>
+      <div class="cl-en">L${l.num} · ${l.en}</div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('cv-osi').innerHTML = CV_OSI.map(buildCL).join('');
+document.getElementById('cv-tcp').innerHTML = CV_TCP.map(buildCL).join('');
+
+/* MAPPING TABLE */
+const mapRows = [
+  {osi:"Layer 7 — Application",tcp:"Layer 4 — Application",note:"جزء من Application في TCP/IP",c:"#c47cf9"},
+  {osi:"Layer 6 — Presentation",tcp:"Layer 4 — Application",note:"جزء من Application في TCP/IP",c:"#9b6de0"},
+  {osi:"Layer 5 — Session",tcp:"Layer 4 — Application",note:"جزء من Application في TCP/IP",c:"#7e5fd0"},
+  {osi:"Layer 4 — Transport",tcp:"Layer 3 — Transport",note:"تطابق مباشر 1:1",c:"#3dd68c"},
+  {osi:"Layer 3 — Network",tcp:"Layer 2 — Internet",note:"تطابق مباشر 1:1",c:"#f5c842"},
+  {osi:"Layer 2 — Data Link",tcp:"Layer 1 — Network Access",note:"جزء من Network Access",c:"#f59042"},
+  {osi:"Layer 1 — Physical",tcp:"Layer 1 — Network Access",note:"جزء من Network Access",c:"#f06b7a"},
+];
+document.getElementById('maptbl').innerHTML =
+  `<div class="mrow mh"><div class="mc">OSI Layer</div><div class="mc">TCP/IP Layer</div><div class="mc">ملاحظة</div></div>` +
+  mapRows.map(r=>`
+  <div class="mrow">
+    <div class="mc"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${r.c};margin-left:8px;flex-shrink:0;vertical-align:middle"></span>${r.osi}</div>
+    <div class="mc">${r.tcp}</div>
+    <div class="mc" style="color:var(--muted);font-size:.73rem">${r.note}</div>
+  </div>`).join('');
+
+/* ═══════════ QUIZ ═══════════ */
+let qIdx=0, qScore=0, qAnswered=false;
+
+function renderQ(){
+  const q=QUIZ[qIdx];
+  document.getElementById('qbar').style.width=`${(qIdx/QUIZ.length)*100}%`;
+  document.getElementById('qbody').innerHTML = `
+    <div class="qnum">السؤال ${qIdx+1} من ${QUIZ.length}</div>
+    <div class="qtxt">${q.q}</div>
+    <div class="qopts">${q.opts.map((o,i)=>`<button class="qopt" onclick="pick(${i})">${o}</button>`).join('')}</div>
+    <div class="qfb" id="qfb"></div>
+    <button class="qnext" id="qnxt" onclick="nextQ()">${qIdx<QUIZ.length-1?'السؤال التالي ←':'اعرض النتيجة 🎉'}</button>`;
+  qAnswered=false;
+}
+
+function pick(i){
+  if(qAnswered) return; qAnswered=true;
+  const q=QUIZ[qIdx];
+  const opts=document.querySelectorAll('.qopt');
+  opts.forEach(o=>o.setAttribute('disabled',true));
+  const fb=document.getElementById('qfb'), nb=document.getElementById('qnxt');
+  if(i===q.ans){ qScore++; opts[i].classList.add('ok'); fb.className='qfb show ok'; fb.textContent='✅ '+q.exp; }
+  else{ opts[i].classList.add('no'); opts[q.ans].classList.add('ok'); fb.className='qfb show no'; fb.textContent='❌ إجابة خاطئة. '+q.exp; }
+  nb.classList.add('show');
+}
+
+function nextQ(){
+  qIdx++;
+  if(qIdx>=QUIZ.length) showScore();
+  else renderQ();
+}
+
+function showScore(){
+  document.getElementById('qbody').innerHTML='';
+  document.getElementById('qbar').style.width='100%';
+  const p=qScore/QUIZ.length;
+  const em=p>=.9?'🏆':p>=.7?'🎉':p>=.5?'😊':'📚';
+  const msg=p>=.9?'ممتاز! أنت خبير في الشبكات!':p>=.7?'أحسنت! نتيجة رائعة!':p>=.5?'جيد! راجع بعض الطبقات مجدداً':'راجع المحتوى وحاول مجدداً 💪';
+  const sc=document.getElementById('qscore');
+  sc.innerHTML=`<div class="sc-em">${em}</div>
+    <div class="sc-n" style="color:${p>=.7?'#3dd68c':'#f5c842'}">${qScore} / ${QUIZ.length}</div>
+    <div class="sc-lb">${msg}</div>
+    <button class="btn-p" onclick="restartQ()">إعادة الاختبار ↺</button>`;
+  sc.classList.add('show');
+}
+
+function restartQ(){
+  qIdx=0; qScore=0; qAnswered=false;
+  document.getElementById('qscore').classList.remove('show');
+  renderQ();
+}
+
+renderQ();
 </script>
 </body>
 </html>
